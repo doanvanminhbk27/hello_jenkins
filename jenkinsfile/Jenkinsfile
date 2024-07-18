@@ -7,5 +7,23 @@ pipeline {
                 git branch: 'main', url: 'https://github.com/doanvanminhbk27/hello_jenkins.git'
             }
         }
+        stage('SSH server'){ 
+            steps {
+                sshagent(['ssh-remove-3']) {
+                    script {
+                        def cmd = '''
+                            ssh -o StrictHostKeyChecking=no doanminh@ubuntu \
+                            "mkdir -p /home/doanminh/Desktop/test_data && echo "/home/doanminh/Desktop/test_data/test_sshagent.txt""
+                            '''
+                        sh cmd
+                    }
+                }
+            }
+        }
+        stage('Publish Over SSH'){ 
+            steps {
+                sshPublisher(publishers: [sshPublisherDesc(configName: 'ubuntu-remote-server', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: 'touch /home/doanminh/Desktop/test_data/test_sshPublisher.txt', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '', remoteDirectorySDF: false, removePrefix: '', sourceFiles: 'index.html')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
+            }
+        }
     }
 }
